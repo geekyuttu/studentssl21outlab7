@@ -14,7 +14,7 @@ public class Board{
 	//SYNC SHARED VARIABLES
 	
 	//to keep track of threads hitting barriers
-	public int count;
+	public int count; // how many players have made their moves
 
 	//some useful global info
 	public int totalThreads; // T
@@ -51,12 +51,12 @@ public class Board{
 	//has no move been played? helpful in intialisation
 	public boolean embryo;
 
-	//_________________________________________________________________________________
+	// _________________________________________________________________________________
 	
 	//SYNC PRIMITIVES: SEMAPHORES
 	
-	//for threads to take turns and respect timesteps
-	public Semaphore countProtector; 
+	//for threads to take turns and re	ect timesteps
+	public Semaphore countProtector;
 	public Semaphore barrier1;
 	public Semaphore barrier2;
 
@@ -89,9 +89,9 @@ public class Board{
 		this.dead = true;
 		this.embryo = true;
 
-		this.countProtector = new Semaphore(1); //mutex for count
-		this.barrier1 = new Semaphore(0); //permits for first part of cyclic barrier
-		this.barrier2 = new Semaphore(0); //permits for second part of cyclic barrier
+		this.countProtector = new Semaphore(1); // mutex for count
+		this.barrier1 = new Semaphore(0); // permits for first part of cyclic barrier
+		this.barrier2 = new Semaphore(0); // permits for second part of cyclic barrier
 
 		this.moderatorEnabler = new Semaphore(1); //permit for moderator
 		

@@ -22,9 +22,9 @@ public class Moderator implements Runnable{
 				2) one needs a permit to modify thread info
 
 				*/
-                                          
-                                             
-
+                this.board.moderatorEnabler.acquire();                          
+                this.board.threadInfoProtector.acquire();                             
+				
 
 				/* 
 				look at the thread info, and decide how many threads can be 
@@ -44,16 +44,18 @@ public class Moderator implements Runnable{
 				//base case
 				
 				if (this.board.embryo){
-					                              
-                                        
-                                   
+                           
+                    this.board.registration.release(1);
+					this.board.playingThreads++;
+					this.board.totalThreads++;
+					this.board.threadInfoProtector.release();
                                               
 					continue;
 				}
 				
 				
 				//find out how many newbies
-				int newbies = ;
+				int newbies = this.board.totalThreads - this.board.playingThreads + this.board.quitThreads;
 
 
 				/*
@@ -64,28 +66,27 @@ public class Moderator implements Runnable{
 				Thus, the moderator's job will be done, and this thread can terminate.
 				As good practice, we will release the "lock" we held. 
 				*/
-
+				if(this.board.totalThreads == 0){
+					this.board.dead = true;
+				}
 				                                  
-                                              
-            
-     
+				this.board.registration.release(newbies);
 				
 				/* 
 				If we have come so far, the game is afoot.
-
+				
 				totalThreads is accurate. 
 				Correct playingThreads
 				reset quitThreads
-
-
+				
+				
 				Release permits for threads to play, and the permit to modify thread info
 				*/
-
-				                                                    
-                               
-    
-                                             
-                                                          
+				this.board.playingThreads = this.board.playingThreads - this.board.quitThreads + newbies;
+				this.board.quitThreads = 0;
+				
+				this.board.reentry.release(this.board.playingThreads);                                              
+				this.board.threadInfoProtector.release();
                                              
 			}
 			catch (InterruptedException ex){

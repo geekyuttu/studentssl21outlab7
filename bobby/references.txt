@@ -1,0 +1,7 @@
+Threads & running - https://www.youtube.com/watch?v=cfyMXtnyu_s
+Semaphore basic on bb - https://www.youtube.com/watch?v=eoGkJWgxurQ
+Semaphore basic- https://www.youtube.com/watch?v=shH38znT_sQ
+Semaphore code - https://www.youtube.com/watch?v=KxTRsvgqoVQ
+Executor - https://www.youtube.com/watch?v=6Oo-9Can3H8
+Socket programming - https://www.youtube.com/watch?v=BqBKEXLqdvI
+Client server connection - https://www.youtube.com/watch?v=ZIzoesrHHQo

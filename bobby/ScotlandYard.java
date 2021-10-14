@@ -5,7 +5,10 @@ import java.io.*;
 import java.util.*;
 
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
+// import jdk.internal.icu.text.NormalizerBase.Mode;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -67,9 +70,8 @@ public class ScotlandYard implements Runnable{
 
 			try{
 			
-				//INITIALISATION: get the game going
-
-				
+				// INITIALISATION: get the game going
+				// this.board.registration.release(1);
 
 				Socket socket = null;
 				boolean fugitiveIn;
@@ -82,26 +84,28 @@ public class ScotlandYard implements Runnable{
 				
 				do{
 			                    
-          
-                                    
-       
-                                       
-                         
-               
-      
+					this.board.dead = false;
+                    socket = server.accept();
+					if(socket == null) fugitiveIn = false;
+					else fugitiveIn = true;
+					
 				} while (!fugitiveIn);
 				
 				System.out.println(this.gamenumber);
-
+				
 				// Spawn a thread to run the Fugitive
-                                             
-                                 
-                            
-                                                                                                  
-                                             
-
+				ServerThread playerThread = new ServerThread(this.board,-1,socket,this.port,this.gamenumber);
+				threadPool.execute(playerThread);
+				
+				
+				
+				
+				
 				// Spawn the moderator
-                                                  
+				Moderator moderator = new Moderator(this.board);
+				threadPool.execute(moderator);
+
+				
                 
 				while (true){
 					/*
@@ -110,12 +114,12 @@ public class ScotlandYard implements Runnable{
 					*/
 
 					try {
-
+						socket = server.accept();
 					} 
 					catch (SocketTimeoutException t){
                                                
                             
-                                                
+                        if(this.board.dead) break;                    
              
        
                                                
@@ -133,13 +137,26 @@ public class ScotlandYard implements Runnable{
 					don't forget to release lock when done!
 					*/
 					                                         
-                          
+                    this.board.threadInfoProtector.acquire();   
                      
-                                               
-            
+					if(this.board.getAvailableID() == -1){
+						socket.close();
+						System.out.println("Sorry Game is full!!");
+						continue;
+					}else if(this.board.dead){
+						socket.close();
+						System.out.println("Sorry Game is Over!!");
+						break;
+					}
+					
       
-                                                 
-                          
+					int id = this.board.getAvailableID();
+                    
+					playerThread = new ServerThread(this.board,id,socket,this.port,this.gamenumber);
+					threadPool.execute(playerThread);                 
+					
+					this.board.totalThreads++;
+					this.board.moderatorEnabler.release();
                      
                                                
                
@@ -149,7 +166,7 @@ public class ScotlandYard implements Runnable{
                                   
 
                                               
-
+					board.threadInfoProtector.release();
 				}
 
 				/*
@@ -157,9 +174,10 @@ public class ScotlandYard implements Runnable{
 				
 				kill threadPool (Careless Whispers BGM stops)
 				*/
-			            
-                        
-                               
+                
+				this.board.moderatorEnabler.acquire();
+				server.close();        
+                threadPool.isShutdown();               
     
 				System.out.println(String.format("Game %d:%d Over", this.port, this.gamenumber));
 				return;
