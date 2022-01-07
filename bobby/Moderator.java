@@ -22,7 +22,8 @@ public class Moderator implements Runnable{
 				2) one needs a permit to modify thread info
 
 				*/
-                this.board.moderatorEnabler.acquire();                          
+                // System.out.println("Acquired ModeratorEnabler");
+				this.board.moderatorEnabler.acquire();                          
                 this.board.threadInfoProtector.acquire();                             
 				
 
@@ -45,8 +46,8 @@ public class Moderator implements Runnable{
 				
 				if (this.board.embryo){
                            
-                    this.board.registration.release(1);
-					this.board.playingThreads++;
+                    this.board.registration.release();
+					this.board.reentry.release();
 					this.board.totalThreads++;
 					this.board.threadInfoProtector.release();
                                               
@@ -55,8 +56,11 @@ public class Moderator implements Runnable{
 				
 				
 				//find out how many newbies
+				// System.out.println(this.board.totalThreads + " total ");
+				// System.out.println(this.board.playingThreads + " playing ");
+				// System.out.println(this.board.quitThreads + " quit ");
 				int newbies = this.board.totalThreads - this.board.playingThreads + this.board.quitThreads;
-
+				// System.out.println(newbies + " Newbies ");
 
 				/*
 				If there are no threads at all, it means Game Over, and there are no 
@@ -68,7 +72,7 @@ public class Moderator implements Runnable{
 				*/
 				if(this.board.totalThreads == 0){
 					this.board.dead = true;
-				}
+				}	
 				                                  
 				this.board.registration.release(newbies);
 				
@@ -82,10 +86,11 @@ public class Moderator implements Runnable{
 				
 				Release permits for threads to play, and the permit to modify thread info
 				*/
-				this.board.playingThreads = this.board.playingThreads - this.board.quitThreads + newbies;
+				this.board.playingThreads = this.board.totalThreads;
 				this.board.quitThreads = 0;
 				
 				this.board.reentry.release(this.board.playingThreads);                                              
+				// System.out.println("Number of reentry permits: " + this.board.reentry.availablePermits());
 				this.board.threadInfoProtector.release();
                                              
 			}

@@ -23,6 +23,7 @@ public class ManualPlayer{
 			if ((feedback = input.readLine()) != null){
 				System.out.println(feedback);
 				String move = console.readLine();
+				// System.out.println("am here");
 				output.println(move);
 			}
 			else{
@@ -31,6 +32,7 @@ public class ManualPlayer{
 
 			//subsequent moves, feedback in format
 			while ((feedback = input.readLine()) != null){
+				// System.out.println("am here");
 				System.out.println(feedback);
 				String indicator;
 

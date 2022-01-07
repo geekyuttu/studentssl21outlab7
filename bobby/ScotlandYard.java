@@ -1,6 +1,7 @@
 package bobby;
 
 import java.net.*;
+import java.time.Clock;
 import java.io.*;
 import java.util.*;
 
@@ -75,7 +76,7 @@ public class ScotlandYard implements Runnable{
 
 				Socket socket = null;
 				boolean fugitiveIn;
-				
+			
 				/*
 				listen for a client to play fugitive, and spawn the moderator.
 				
@@ -85,7 +86,13 @@ public class ScotlandYard implements Runnable{
 				do{
 			                    
 					this.board.dead = false;
-                    socket = server.accept();
+					
+					try{
+						socket = this.server.accept();
+					}catch(SocketTimeoutException t){
+
+					}
+					
 					if(socket == null) fugitiveIn = false;
 					else fugitiveIn = true;
 					
@@ -114,11 +121,10 @@ public class ScotlandYard implements Runnable{
 					*/
 
 					try {
-						socket = server.accept();
+						socket = this.server.accept();
 					} 
 					catch (SocketTimeoutException t){
-                                               
-                            
+                                                  
                         if(this.board.dead) break;                    
              
        
@@ -139,34 +145,27 @@ public class ScotlandYard implements Runnable{
 					                                         
                     this.board.threadInfoProtector.acquire();   
                      
-					if(this.board.getAvailableID() == -1){
+					int id = this.board.getAvailableID();
+
+					if(id == -1){
+						// System.out.println("Sorry Game is full!!");
 						socket.close();
-						System.out.println("Sorry Game is full!!");
 						continue;
 					}else if(this.board.dead){
 						socket.close();
-						System.out.println("Sorry Game is Over!!");
+						// System.out.println("Sorry Game is Over!!");
 						break;
 					}
-					
-      
-					int id = this.board.getAvailableID();
                     
 					playerThread = new ServerThread(this.board,id,socket,this.port,this.gamenumber);
 					threadPool.execute(playerThread);                 
 					
 					this.board.totalThreads++;
-					this.board.moderatorEnabler.release();
-                     
-                                               
-               
-      
-     
-                                                                                                          
-                                  
-
-                                              
 					board.threadInfoProtector.release();
+
+
+					// this.board.moderatorEnabler.release();
+                     
 				}
 
 				/*
@@ -175,7 +174,7 @@ public class ScotlandYard implements Runnable{
 				kill threadPool (Careless Whispers BGM stops)
 				*/
                 
-				this.board.moderatorEnabler.acquire();
+				
 				server.close();        
                 threadPool.isShutdown();               
     
@@ -200,6 +199,7 @@ public class ScotlandYard implements Runnable{
 		for (int i=0; i<args.length; i++){
 			int port = Integer.parseInt(args[i]);
 			Thread tau = new Thread(new ScotlandYard(port));
+			// System.out.println("thread Started");
 			tau.start();
 		}
 	}
