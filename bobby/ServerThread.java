@@ -420,8 +420,7 @@ public class ServerThread implements Runnable{
 
 				Reuse count to keep track of how many threads hit this barrier2 
 
-				The code is similar. However, the last thread to hit this barrier must also 
-				permit the moderator to run
+				The code is similar. 
 				*/
 
 				// System.out.println("Board count = " + this.board.count);
@@ -447,7 +446,10 @@ public class ServerThread implements Runnable{
 				actually finishing off a thread
 				that decided to quit
 
-				If you quit while reading, now is the time to erase the player
+				However, the last thread to hit this must issue one
+				permit for the moderator to run
+
+				If all else fails use the barriers again
 				*/
 				                          
 				if(quit_while_reading){
